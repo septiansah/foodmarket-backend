@@ -71,12 +71,6 @@ class UserController extends Controller
                 return response()->json($validator->errors(), 400);
             };
 
-            // $request->validate([
-            //     'name' => ['required', 'string', 'max:255'],
-            //     'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            //     'password' => $this->passwordRules()
-            // ]);
-            // var_dump($request);
             User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -87,21 +81,66 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $user = User::Where('email', $request->email)->first();
-            $tokenResult = $user->createToken('authToken')->plaintTextToken;
+            $user = User::where('email', $request->email)->first();
+
+            $tokenResult = $user->createToken('authToken')->plainTextToken;
+
             return ResponseFormatter::success([
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
                 'user' => $user
-            ]);
+            ],'User Registered');
+
         } catch(Exception $error) {
-            // error_log('Some message here',1);
+            error_log('Some message here',1);
             return ResponseFormatter::error([
                 'message' => 'Something went wrong',
                 'error' => $error,
             ], 'Authentication failed', 500);
         }
     }
+
+
+    // public function register(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'name' => ['required', 'string', 'max:255'],
+    //             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+    //             'password' => $this->passwordRules()
+    //         ]);
+    //         // error_log($validator);
+    //         if ($validator->fails()) {
+    //             return response()->json($validator->errors(), 400);
+    //         };
+
+    //         User::create([
+    //             'name' => $request->name,
+    //             'email' => $request->email,
+    //             'address' => $request->address,
+    //             'houseNumber' => $request->houseNumber,
+    //             'phoneNumber' => $request->phoneNumber,
+    //             'city' => $request->city,
+    //             'password' => Hash::make($request->password),
+    //         ]);
+
+    //         $user = User::where('email', $request->email)->first();
+
+    //         // $tokenResult = $user->createToken('authToken')->plainTextToken;
+
+    //         return ResponseFormatter::success([
+    //             // 'access_token' => $tokenResult,
+    //             'token_type' => 'Bearer',
+    //             'user' => $user
+    //         ],'User Registered');
+    //     } catch (Exception $error) {
+    //         // error_log();
+    //         return ResponseFormatter::error([
+    //             'message' => 'Something went wrong',
+    //             'error' => $error,
+    //         ],'Authentication Failed', 500);
+    //     }
+    // }
 
     public function logout(Request $request) {
         $token = $request->user()->currentAccessToken()->delete();
